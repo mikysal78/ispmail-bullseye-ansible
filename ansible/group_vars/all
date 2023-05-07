@@ -74,8 +74,8 @@ ispmailadmin_db_user: mailadmin
 ispmailadmin_db_pass: "Change;me"
 ispmailadmin_db_name: mailserver
 ispmailadmin_db_host: localhost
-ispmailadmin_user: ninux
-ispmailadmin_pass: NinuxBas2022
+ispmailadmin_user: admin
+ispmailadmin_pass: "Change;me"
 ispmailadmin_access: account
 ispamailadmin_pass_hashes: sha256
 ispmailadmin_version: 0.9.9

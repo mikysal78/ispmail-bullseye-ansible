@@ -29,7 +29,8 @@ Add your mail server to the _hosts_ file with its IP address (this is just an ex
 …and run:
 
     cd ispmail-bullseye-ansible/ansible
-    ansible-playbook ispmail.yml -l my.mail.server
+    ansible-galaxy install -r requirements.yml
+    ansible-playbook -i host ispmail.yml
 
 At the end of the playbook you will get a report like:
 
