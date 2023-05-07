@@ -1,0 +1,7 @@
+---
+# tasks file for lemp
+- include_tasks: apt.yml
+- include_tasks: php.yml
+- include_tasks: composer.yml
+- include_tasks: initapps.yml
+- include_tasks: phpmyadmin.yml

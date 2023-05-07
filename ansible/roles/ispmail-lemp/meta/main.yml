@@ -1,0 +1,24 @@
+galaxy_info:
+  author: Michele Salerno
+  description: Install server LEMP with phpmyadmin
+  role_name: lemp
+  company: ninux.org
+  license: license GPL
+  min_ansible_version: 2.9
+  platforms:
+  - name: Debian
+    versions:
+    - buster
+  galaxy_tags:
+  - web
+  - lemp
+  - linux
+  - debian
+  - nginx
+  - php
+  - composer
+  - phpmyadmin
+
+dependencies:
+  # - hanxhx.mysql
+  # - geerlingguy.certbot

@@ -1,0 +1,19 @@
+---
+# defaults file for ansible-roundcube
+
+# General Settings
+roundcube_htdocs: /var/www/roundcube
+roundcube_version: 1.6.1
+roundcube_install_composer: False
+
+# Database
+roundcube_db_user: roundcube
+roundcube_db_password: ChangeMe
+roundcube_db_host: localhost
+roundcube_db_name: roundcube
+
+#config.inc.php
+roundcube_smtp_tls: True
+roundcube_mail_server: mail.domain.tld
+roundcube_product_name: Roundcube Webmail
+roundcube_des_key: "{{ lookup('password', '/dev/null length=24 chars=ascii_letters,digits,hexdigits,punctuation' ) }}"

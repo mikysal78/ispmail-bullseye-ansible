@@ -1,0 +1,37 @@
+---
+# tasks file for php
+- name: PHP | FPM php.ini
+  template:
+    src: php.ini.j2
+    dest: "{{ path_php_config }}/fpm/php.ini"
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+  tags: php
+
+- name: PHP | CLI php.ini
+  template:
+    src: php.ini.j2
+    dest: "{{ path_php_config }}/cli/php.ini"
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+  tags: php
+
+- name: PHP | configure opcache
+  copy:
+    src: opcache.ini
+    dest: "{{ path_php_config }}/mods-available/opcache.ini"
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+  tags: php
+
+- name: PHP | restart nginx
+  raw: service nginx restart
+
+- name: PHP | restart fpm
+  raw: service php7.4-fpm restart

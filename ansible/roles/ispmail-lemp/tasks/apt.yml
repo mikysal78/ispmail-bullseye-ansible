@@ -1,0 +1,11 @@
+---
+# tasks file for apt
+- name: Update APT package cache
+  apt: update_cache=yes
+  tags: apt
+
+- name: APT | install packages
+  apt: >
+    name={{ packages }} state=latest
+  tags: apt
+

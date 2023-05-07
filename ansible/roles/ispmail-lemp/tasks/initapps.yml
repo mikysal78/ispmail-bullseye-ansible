@@ -1,0 +1,102 @@
+---
+# tasks file for initapps
+- name: Generate Diffie-Hellman parameters with the default size (4096 bits)
+  community.crypto.openssl_dhparam:
+    path: /etc/ssl/certs/dhparam.pem
+      
+- name: create directory if they don't exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ groupname }}"
+    mode: 0775
+  loop:
+    - "{{ projects_root }}"
+    - "{{ web_root }}"
+    - "{{ repos_root }}"
+  tags: initapps
+
+- name: Create web apps directories (repos)
+  shell: "git init --bare {{ repos_root }}/{{ item }}.git"
+  with_items: "{{ apps }}"
+  register: reposinited
+
+- name: Copy Git post recieve hook file
+  template:
+    src: post-receive.j2
+    dest: "{{ repos_root }}/{{ item }}.git/hooks/"
+  with_items: "{{ apps }}"
+
+- name: Make post recieve hook file executable
+  file:
+    path: "{{ repos_root }}/{{ item }}.git/hooks/post-receive"
+    state: touch
+    mode: "a+x"
+  with_items: "{{ apps }}"
+
+- name: Change permissions
+  file:
+    path: "{{ repos_root }}/{{ item }}.git"
+    state: directory
+    recurse: yes
+    owner: "{{ username }}"
+    group: "{{ groupname }}"
+  with_items: "{{ apps }}"
+
+- name: Create web apps directories (sites)
+  file:
+    group: "{{ groupname }}"
+    owner: "{{ username }}"
+    mode: 755
+    state: directory
+    path: "{{ web_root }}/{{ item }}"
+  with_items: "{{ apps }}"
+  register: sitesdirscreated
+
+#- name: Create web logs access (sites)
+#  file:
+#    group: "{{ groupname }}"
+#    owner: "{{ username }}"
+#    mode: 664
+#    state: touch
+#    path:  "/var/log/nginx/{{ item }}_access.log"
+#
+#- name: Create web logs error (sites)
+#  file:
+#    group: "{{ groupname }}"
+#    owner: "{{ username }}"
+#    mode: 664
+#    state: touch
+#    path:  "/var/log/nginx/{{ item }}_error.log"
+
+- name: Copy default index.html file
+  template:
+    src: index.html.j2
+    dest: "{{ web_root }}/{{ item }}/index.html"
+  with_items: "{{ apps }}"
+
+- name: Create Nginx config files
+  template:
+    src: sites.j2
+    dest: "/etc/nginx/sites-available/{{ item }}.conf"
+  with_items: "{{ apps }}"
+
+- name: Enable Nginx sites
+  file:
+    src: "/etc/nginx/sites-available/{{ item }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+    state: link
+  with_items: "{{ apps }}"
+
+- name: Create directory for XML auto-configuration
+  file:
+    path: /var/www/autoconfig-mail
+    state: directory
+    owner: www-data
+    group: www-data
+
+- name: Create auto-configuration XML file
+  template:
+    src: autoconfig.j2
+    dest: /var/www/autoconfig-mail/config-v1.1.xml

@@ -1,2 +1,9 @@
-localhost ansible_connection=local
-ispmail.fritz.box
+## Global Vars
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_port=2400
+
+## Inventory
+[mail]
+debian ansible_host=10.27.22.150 ansible_user=root
+

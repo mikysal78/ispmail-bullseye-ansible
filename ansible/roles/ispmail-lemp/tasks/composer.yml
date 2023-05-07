@@ -1,0 +1,9 @@
+---
+# tasks file for composer
+- name: PHP | Install Composer
+  shell: curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+  args:
+    warn: no
+  tags:
+    - php
+    - composer

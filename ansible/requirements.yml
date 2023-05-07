@@ -1,0 +1,13 @@
+roles:
+  - name: dkim
+    src: https://github.com/FoxyRoles/ansible-dkim.git
+  - name: geerlingguy.certbot
+    src: https://github.com/geerlingguy/ansible-role-certbot.git
+  #- name: fail2ban
+  #  src: https://github.com/Oefenweb/ansible-fail2ban.git
+
+collections:
+  - name: community.general
+  - name: community.mysql
+  - name: community.crypto
+  - name: ansible.posix

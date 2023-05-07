@@ -19,20 +19,17 @@
 - hosts: all
   roles:
     #- dumpvars
-    - role: ispmail-packages
-      tags: packages
-    - role: geerlingguy.certbot
-      tags: certbot
-    - role: ispmail-database
-      tags: database
-    - role: ispmail-postfix
-      tags: postfix
-    - role: ispmail-dovecot
-      tags: dovecot
-    - role: ispmail-webmail-apache-roundcube
-      tags: roundcube
-    - role: ispmail-rspamd
-      tags: rspamd
+    - { role: ispmail-packages, tags: packages }
+    - { role: geerlingguy.certbot, tags: certbot, when: lets is true }
+    - { role: ispmail-certificate, tags: cert-self, when: lets is false }
+    - { role: ispmail-database, tags: database }
+    - { role: ispmail-postfix, tags: postfix }
+    - { role: ispmail-dovecot, tags: dovecot }
+    - { role: ispmail-rspamd, tags: rspamd }
+    - { role: ispmail-lemp, tags: lemp }
+    - { role: ispmail-roundcube, tags: roundcube }
+    - { role: ispmail-admin, tags: ispmail }
+    - { role: dkim, tags: dkim }
 
 - hosts: all
   tags: always
@@ -41,8 +38,11 @@
         msg:
           - "Installation complete."
           - ""
+          - "ISPMail Admin URL:       http://ispmail.{{ispmail_fqdn}}/"
+          - "ISPMail user:            {{ ispmailadmin_user }}"
+          - "ISPMail password:        {{ ispmailadmin_pass }}"
           - "Web mail URL:            https://{{ispmail_fqdn}}/"
           - "Example email user:      john@{{ispmail_fqdn}}"
           - "Example email password:  summersun"
-          - "Rspamd admin URL:        https://{{ispmail_fqdn}}/rspamd"
+          - "Rspamd admin URL:        https://{{ispmail_fqdn}}/rspamd/"
           - "Rspamd admin password:   {{ispmail_rspamd_web_password}}"

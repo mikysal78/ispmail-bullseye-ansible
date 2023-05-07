@@ -1,0 +1,65 @@
+---
+# tasks file for ansible-roundcube
+- name: RoundCube | install composer
+  shell: curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+  args:
+    warn: no
+  when: roundcube_install_composer | bool
+
+- name: RoundCube | extract roundcube package
+  unarchive:
+    src: "https://github.com/roundcube/roundcubemail/releases/download/{{ roundcube_version }}/roundcubemail-{{ roundcube_version }}-complete.tar.gz"
+    dest: /tmp
+    remote_src: yes
+
+- name: RoundCube | clean directory installer
+  file:
+    state: absent
+    path: "/tmp/roundcubemail-{{ roundcube_version }}/installer"
+
+- name: RoundCube | create directory htdocs
+  file:
+    path: "{{ roundcube_htdocs }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: 0755
+
+- name: RoundCube | copy source to htdocs
+  shell: 'cp -r /tmp/roundcubemail-{{ roundcube_version }}/. {{ roundcube_htdocs }}'
+
+- name: RoundCube | Change permissions
+  file:
+    path: "{{ roundcube_htdocs }}/{{ item }}"
+    state: directory
+    recurse: yes
+    owner: www-data
+    group: www-data
+  with_items:
+    - logs
+    - temp
+
+- name: RoundCube | set config.inc.php file
+  template:
+    src: config.inc.php.j2
+    dest: "{{ roundcube_htdocs }}/config/config.inc.php"
+
+- name: RoundCube | copy database schema_rb.sql file
+  copy:
+    src: schema_rb.sql
+    dest: /tmp
+
+- name: RoundCube | creating MySQL user roundcube
+  mysql_user:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: roundcube
+    password: "{{ ispmail_mysql_roundcube_password }}"
+    priv: roundcube.*:SELECT,INSERT,UPDATE,DELETE
+    host: localhost
+
+- name: RoundCube | import database schema_rb.sql
+  mysql_db:
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    name: roundcube
+    state: import
+    target: /tmp/schema_rb.sql

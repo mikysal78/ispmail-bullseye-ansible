@@ -1,0 +1,68 @@
+---
+# tasks file for phpmyadmin
+- name: Creating random secret blowfish for phpMyAdmin
+  shell: pwgen -sy 32 1
+  register: phpmyadmin_secret_blowfish
+
+
+- name: Create directory if they don't exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ groupname }}"
+    mode: 0775
+  loop:
+    - "{{ etc }}"
+    - "{{ lib }}"
+    - "{{ tmp }}"
+  tags: phpmyadmin
+
+- name: Extract phpMyAdmin
+  unarchive:
+    src: "https://files.phpmyadmin.net/phpMyAdmin/{{ phpmyadmin_version }}/phpMyAdmin-{{ phpmyadmin_version }}-all-languages.tar.gz"
+    dest: "{{ archive }}"
+    remote_src: yes
+  tags: phpmyadmin
+
+- name: Symbolic link for phpMyAdmin
+  file:
+    src: "{{ archive }}/phpMyAdmin-{{ phpmyadmin_version }}-all-languages"
+    dest: "{{ shared }}"
+    state: link
+  tags: phpmyadmin
+
+- name: Config phpMyAdmin
+  template:
+    src: config.inc.php.j2
+    dest: "{{ shared }}/config.inc.php"
+  tags: phpmyadmin
+
+- name: Create tables
+  raw: "mysql --defaults-file=/etc/mysql/debian.cnf < {{ shared }}/sql/create_tables.sql"
+  tags: phpmyadmin
+
+- name: Copy snippets phpMyAdmin
+  copy:
+    src: snippets-phpmyadmin.conf
+    dest: /etc/nginx/snippets/phpmyadmin.conf
+  tags:
+    - phpmyadmin
+    - nginx
+
+- name: Config default site nginx
+  template:
+    src: default-site.conf.j2
+    dest: /etc/nginx/sites-available/default
+  tags:
+    - phpmyadmin
+    - nginx
+
+- name: Touch htpasswd
+  file:
+    path: "{{ etc }}/htpasswd.setup"
+    state: touch
+  tags: phpmyadmin
+
+- name: Restart nginx
+  raw: service nginx restart
